@@ -1,0 +1,119 @@
+@font-face {
+    font-family: 'hand1';
+    src: url('./font/hand-1.otf');
+}
+
+@font-face {
+    font-family: 'hand2';
+    src: url('./font/hand-2.otf');
+}
+
+@font-face {
+    font-family: 'hand3';
+    src: url('./font/hand-3.otf');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    box-sizing: border-box;
+    font-family: 'hand2';
+    font-size: 1.8rem;
+    background-color: whitesmoke;
+    color: black;
+}
+
+main {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+canvas {
+    /* width: 200vw !important;
+    height: 200vh !important; */
+    background-color: white;
+    touch-action: none;
+    user-select: none;
+    -webkit-transform: translate(0px, 0px);
+    transform: translate(0px, 0px);
+}
+
+button {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    margin-bottom: 7rem;
+    /* margin-bottom: 5rem; */
+    font-family: 'hand2';
+    font-size: 7rem;
+    background-color: transparent;
+    color: #2e2e2e;
+    border: none;
+    cursor: pointer;
+    z-index: 9999;
+    transition: all .3s ease-in-out;
+}
+
+button:hover {
+    color: black;
+}
+
+button:focus {
+    outline: none;
+}
+
+#button-draw {
+    display: block;
+}
+
+#button-save, #button-cancel {
+    display: none;
+}
+
+#button-cancel {
+    margin-bottom: 4rem;
+    font-size: 3.5rem;
+    color: gray;
+}
+
+#button-cancel:hover {
+    color: #1f1f1f;
+}
+
+
+#speak-draw {
+    display: none;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    background-color: rgba(255, 255, 255, .7);
+    z-index: 99;
+    pointer-events: none;
+}
+
+.speak-draw--texts {
+    position: absolute;
+    top: 32%;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+#speak-draw p {
+    font-size: 6rem;
+    text-align: center;
+}
+
+#speak {
+    margin-bottom: 7rem;
+}
