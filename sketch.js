@@ -1,7 +1,6 @@
 let SpeechRecognition = webkitSpeechRecognition
 let SpeechRecognitionEvent = webkitSpeechRecognitionEvent
 
-// target elements with the "draggable" class
 interact('.draggable')
     .draggable({
         inertia: true,
@@ -34,9 +33,7 @@ window.dragMoveListener = dragMoveListener;
 
 let url;
 let database;
-let drawButton;
-let saveButton;
-let cancelButton;
+let drawButton, saveButton, cancelButton;
 let speak;
 let result;
 let saves = [];
@@ -45,34 +42,36 @@ let currStrokeIndex = [];
 let xPoints = [];
 let yPoints = [];
 let i = 0;
-let input; 
-let search;
+let value;
 let valueWords;
 let valueWordsIdx = 0;
-let randomStroke;
-let randomColor;
-// let stroke_weight;
+let randomStroke, randomColor;
+let writing = false;
 
 let x, y;
 let strokeIndex = 0;
 let index = 0;
 let drawing;
 let prevx, prevy;
-let randomPositionX;
-let randomPositionY;
-let randomNumberX;
-let randomNumberY;
-let xPos;
-let yPos; 
+let randomPositionX, randomPositionY;
+let randomNumberX, randomNumberY;
+let xPos, yPos;
 
 let recognition = new SpeechRecognition();
 recognition.continuous = true;
 recognition.interimResults = false;
 
+let hand1, hand2, hand3;
+
+function preload() {
+    hand1 = loadFont('font/hand-1.otf');
+    hand2 = loadFont('font/hand-2.otf');
+    hand3 = loadFont('font/hand-3.otf');
+}
+
 function setup() {
     let canvas = createCanvas(4200, 2625);
     canvas.parent('main');
-    console.log(document.querySelector('canvas'));
     document.querySelector('canvas').classList.add('draggable');
 
     let a = document.querySelector('canvas')
@@ -112,8 +111,6 @@ function setup() {
 
 const newDrawing = () => {
     recognition.start();
-    console.log(xPos);
-    console.log(yPos);
 
     drawButton.style.display = 'none';
     saveButton.style.display = 'block';
@@ -137,12 +134,34 @@ const showResult = (event) => {
     let result = document.getElementById('speech-result');
     result.innerHTML = resultString;
 
-    let value = resultString.toLowerCase().trim();
-    valueWords = value.split(' ');
+    value = resultString.trim();
+    let valueLowerCase = value.toLowerCase();
 
-    url = getURL(valueWords[0])
-    console.log(url);
-    loadJSON(url, gotDrawing, err); 
+    let valueWordsCapitalize = value.split(' ');
+    let valueWordsCapitalized = [];
+
+    for (let i=0; i<valueWordsCapitalize.length; i++) {
+        valueWordsCapitalized[i] = valueWordsCapitalize[i].capitalize();
+    }
+
+    valueWordsCapitalized = valueWordsCapitalized.join(' ');
+
+    if (categories.includes(valueLowerCase)) {
+        url = getURL(value.toLowerCase());
+    } else if (categories.includes(valueWordsCapitalized)) {
+        url = getURL(value.capitalize());
+    } else {
+        valueWords = value.split(' ');
+        valueWords = valueWords.filter(ele => categories.includes(ele)); 
+
+        url = getURL(valueWords[0]);
+    }
+
+    if (valueWords.length === 0) {
+        gotDrawing(value);
+    } else {
+        loadJSON(url, gotDrawing, err); 
+    }
 }
 
 function draw() {
@@ -154,7 +173,6 @@ function draw() {
             xPoints.push(x);
             yPoints.push(y);
         }
-
 
         stroke(randomColor[0], randomColor[1], randomColor[2]);
         strokeWeight(randomStroke);
@@ -168,7 +186,6 @@ function draw() {
         if (index >= drawing[strokeIndex][0].length) {
             currStrokeIndex[0] = xPoints;
             currStrokeIndex[1] = yPoints;
-
             currDrawing[strokeIndex] = currStrokeIndex;
 
             // reset 
@@ -187,15 +204,14 @@ function draw() {
                 strokeIndex = 0;
                 valueWordsIdx++;
 
-                if (valueWords.length > 1) {
+                if (valueWords !== undefined) {
                     if (valueWordsIdx === valueWords.length) {
                         drawing = undefined;
                         saves = currDrawing;
                         strokeIndex = 0;
                     } else {
-                        console.log(valueWords[valueWordsIdx], '2');
                         url = getURL(valueWords[valueWordsIdx])
-                        loadJSON(url, gotDrawing, errJSON); 
+                        loadJSON(url, gotDrawing, err); 
                     }
                 }
             } 
@@ -203,10 +219,24 @@ function draw() {
             prevx = x;
             prevy = y;
         }
+    } else if (writing) {
+        let fontSize = randomFontSize();
+
+        noStroke();
+        fill(randomColor);
+        textFont(hand2);
+        textSize(fontSize);
+        text(value, randomPositionX, randomPositionY);
+
+        writing = false;
     }
 }
 
 const gotDrawing = (data) => {
+    if (valueWords.length === 0) {
+        writing = true;
+    }
+ 
     drawing = data.drawing;
 
     let siteWidth = document.body.clientWidth;
@@ -226,7 +256,6 @@ const gotDrawing = (data) => {
     y.push(yPos);
 
     randomNumberY = Math.floor(Math.random() * (Math.floor(siteHeight / 2)));
-    console.log(randomNumberY, 'ran');
 
     if(y[0] < siteHeight - 250) {
         randomPositionY = randomNumberY;
@@ -234,14 +263,11 @@ const gotDrawing = (data) => {
         randomPositionY = y[0] - randomNumberY - 400;
     }
 
-    console.log(randomPositionY, 'pos');
-
     randomStroke = getRandomStroke();
     randomColor = getRandomColor();
 }
 
 const cancel = () => {
-    console.log('working!');
     recognition.stop();
 
     drawButton.style.display = 'block';
@@ -320,3 +346,10 @@ const getRandomColor = () => {
     return color;
 }
 
+const randomFontSize = () => {
+    return Math.floor(Math.random() * (71 - 30) + 30);
+}
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
