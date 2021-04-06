@@ -157,10 +157,14 @@ const showResult = (event) => {
         url = getURL(valueWords[0]);
     }
 
-    if (valueWords.length === 0) {
-        gotDrawing(value);
+    if (valueWords) {
+        if (valueWords && valueWords.length === 0) {
+            gotDrawing(value);
+        } else {
+            loadJSON(url, gotDrawing, err); 
+        }
     } else {
-        loadJSON(url, gotDrawing, err); 
+        loadJSON(url, gotDrawing, err);
     }
 }
 
@@ -233,8 +237,10 @@ function draw() {
 }
 
 const gotDrawing = (data) => {
-    if (valueWords.length === 0) {
-        writing = true;
+    if (valueWords) {
+        if (valueWords.length === 0) {
+            writing = true;
+        }
     }
  
     drawing = data.drawing;
